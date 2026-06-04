@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembelajaran Sistem Tata Surya</title>
+    <style>
+        /* === VARIABEL & RESET === */
+        :root {
+            --primary: #0d47a1;
+            --secondary: #1976d2;
+            --accent: #ffb300;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --bg-card: #ffffff;
+            --success: #4caf50;
+            --danger: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* === TYPOGRAPHY & UMUM === */
+        h1, h2, h3 { margin-bottom: 15px; }
+        p { line-height: 1.6; margin-bottom: 15px; }
+        .highlight { color: var(--accent); font-weight: bold; }
+        .card { background: var(--bg-card); color: var(--text-dark); border-radius: 12px; padding: 25px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); margin-bottom: 20px; }
+        
+        .btn {
+            background: var(--secondary); color: white; border: none; padding: 12px 24px;
+            border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s;
+            font-weight: bold; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn:active { transform: translateY(0); }
+        .btn-accent { background: var(--accent); color: var(--text-dark); }
+        .btn-accent:hover { background: #ffa000; }
+
+        /* === LAYOUT & NAVIGASI === */
+        #login-screen, #main-app {
+            width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px;
+        }
+        
+        #main-app { display: none; flex-direction: column; min-height: 100vh; padding-top: 80px; }
+
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; background: rgba(13, 71, 161, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1000; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+
+        .nav-links { display: flex; gap: 5px; }
+        .nav-btn {
+            background: transparent; color: white; border: none; padding: 10px 15px;
+            cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 5px; transition: 0.3s;
+        }
+        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.2); }
+
+        .nav-controls { display: flex; gap: 10px; }
+        .control-btn {
+            background: transparent; color: white; border: 1px solid white; padding: 5px 10px;
+            border-radius: 5px; cursor: pointer; transition: 0.3s; font-size: 18px;
+        }
+        .control-btn:hover { background: white; color: var(--primary); }
+
+        /* Hamburger Menu (Mobile) */
+        .hamburger { display: none; font-size: 24px; background: none; border: none; color: white; cursor: pointer; }
+
+        /* === SECTIONS === */
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Login Screen */
+        .login-card { max-width: 500px; margin: 10vh auto; text-align: center; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-dark); }
+        .input-group input { width: 100%; padding: 10px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .input-group input:focus { border-color: var(--secondary); outline: none; }
+
+        /* Beranda */
+        .hero { text-align: center; padding: 40px 0; }
+        .hero-img { font-size: 80px; margin: 20px 0; }
+        
+        /* Materi */
+        .interactive-text { color: var(--secondary); text-decoration: underline; cursor: pointer; font-weight: bold; }
+        .planet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+        .planet-card { text-align: center; padding: 15px; border-radius: 8px; background: #f0f8ff; border: 1px solid #cce0ff; transition: 0.3s; cursor:pointer;}
+        .planet-card:hover { transform: scale(1.05); background: #e0f0ff; }
+        .planet-icon { font-size: 40px; margin-bottom: 10px; }
+
+        /* Modal Interaktif */
+        #modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; color: var(--text-dark); padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; position: relative; }
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #888; }
+        .close-modal:hover { color: var(--danger); }
+
+        /* Latihan - Umum */
+        .exercise-nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .ex-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--secondary); background: white; color: var(--secondary); cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .ex-btn.active { background: var(--secondary); color: white; }
+        .exercise-container { display: none; }
+        .exercise-container.active { display: block; animation: fadeIn 0.4s; }
+
+        /* Latihan - Benar Salah */
+        .tf-question { font-size: 20px; text-align: center; margin: 20px 0; font-weight: bold; }
+        .tf-controls { display: flex; justify-content: center; gap: 20px; }
+        .tf-feedback { text-align: center; margin-top: 20px; font-weight: bold; font-size: 18px; padding: 15px; border-radius: 8px; display: none;}
+        .tf-feedback.correct { background: #e8f5e9; color: var(--success); border: 1px solid var(--success); }
+        .tf-feedback.wrong { background: #ffebee; color: var(--danger); border: 1px solid var(--danger); }
+
+        /* Latihan - Mencocokkan */
+        .match-game { display: flex; justify-content: space-between; gap: 20px; }
+        .match-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .match-item { padding: 15px; background: #f5f5f5; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.2s; user-select: none; }
+        .match-item:hover { border-color: var(--secondary); }
+        .match-item.selected { background: #e3f2fd; border-color: var(--secondary); transform: scale(1.02); }
+        .match-item.matched { background: #e8f5e9; border-color: var(--success); color: var(--success); cursor: default; opacity: 0.8; }
+
+        /* Latihan - Drag Drop */
+        .dd-game { display: flex; flex-direction: column; gap: 20px; }
+        .dd-items { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; padding: 15px; background: #f0f0f0; border-radius: 8px; min-height: 80px; }
+        .dd-item { padding: 10px 20px; background: var(--secondary); color: white; border-radius: 20px; cursor: grab; user-select: none; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .dd-item:active { cursor: grabbing; }
+        .dd-zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .dd-zone { padding: 20px; border: 2px dashed #ccc; border-radius: 8px; min-height: 120px; background: #fafafa; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .dd-zone.hover { background: #e3f2fd; border-color: var(--secondary); }
+        .dd-zone h4 { color: var(--text-dark); margin-bottom: 5px; }
+
+        /* Refleksi */
+        textarea { width: 100%; height: 150px; padding: 15px; border-radius: 8px; border: 2px solid #ccc; font-size: 16px; resize: vertical; margin-bottom: 15px; }
+        
+        /* Pengembang */
+        .dev-profile { text-align: center; }
+        .dev-avatar { width: 100px; height: 100px; background: var(--secondary); color: white; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; font-size: 40px; margin-bottom: 15px; font-weight: bold; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            nav { padding: 0 10px; }
+            .nav-links {
+                display: none; position: absolute; top: 60px; left: 0; width: 100%;
+                background: var(--primary); flex-direction: column; padding: 10px 0;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            }
+            .nav-links.show { display: flex; }
+            .nav-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 0; }
+            .hamburger { display: block; }
+            .match-game { flex-direction: column; }
+            .hero-img { font-size: 60px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LAYER LOGIN / DATA SISWA -->
+    <div id="login-screen">
+        <div class="card login-card">
+            <h2>Selamat Datang!</h2>
+            <p>Silakan isi data diri untuk memulai pembelajaran.</p>
+            <div class="input-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="in-nama" placeholder="Masukkan nama kamu..." required>
+            </div>
+            <div class="input-group">
+                <label>Kelas</label>
+                <input type="text" id="in-kelas" placeholder="Contoh: Kelas 6A" required>
+            </div>
+            <div class="input-group">
+                <label>Asal Sekolah</label>
+                <input type="text" id="in-sekolah" placeholder="Nama sekolahmu..." required>
+            </div>
+            <button class="btn btn-accent" style="width: 100%; margin-top: 10px;" onclick="mulaiAplikasi()">Masuk & Mulai Belajar 🚀</button>
+        </div>
+    </div>
+
+    <!-- APLIKASI UTAMA -->
+    <div id="main-app">
+        <!-- Navigasi -->
+        <nav>
+            <button class="hamburger" onclick="toggleMenu()">☰</button>
+            <div class="nav-links" id="navLinks">
+                <button class="nav-btn active" onclick="navigasi('beranda')">Beranda</button>
+                <button class="nav-btn" onclick="navigasi('materi')">Materi</button>
+                <button class="nav-btn" onclick="navigasi('latihan')">Latihan</button>
+                <button class="nav-btn" onclick="navigasi('refleksi')">Refleksi</button>
+                <button class="nav-btn" onclick="navigasi('pengembang')">Pengembang</button>
+            </div>
+            <div class="nav-controls">
+                <button class="control-btn" id="btn-audio" onclick="toggleAudio()" title="Suara ON/OFF">🔊</button>
+                <button class="control-btn" id="btn-fullscreen" onclick="toggleFullScreen()" title="Layar Penuh">⛶</button>
+            </div>
+        </nav>
+
+        <!-- KONTEN: BERANDA -->
+        <section id="beranda" class="section active">
+            <div class="card hero">
+                <h1 id="welcome-text">Halo!</h1>
+                <h2>Pembelajaran Sistem Tata Surya</h2>
+                <div class="hero-img">🌍 ☀️ 🪐</div>
+                <p><b>Tujuan Pembelajaran:</b><br>Peserta didik mampu memahami susunan benda langit dan sistem kerjanya di alam semesta.</p>
+                <button class="btn btn-accent" onclick="navigasi('materi')">Mulai Belajar Sekarang 🚀</button>
+            </div>
+        </section>
+
+        <!-- KONTEN: MATERI -->
+        <section id="materi" class="section">
+            <div class="card">
+                <h2>Sistem Tata Surya</h2>
+                <p>Tata surya kita adalah kumpulan benda langit yang terdiri atas sebuah bintang yang disebut <span class="highlight">Matahari</span> dan semua objek yang terikat oleh gaya gravitasinya.</p>
+                <p>Objek-objek tersebut termasuk delapan planet yang mengelilingi matahari pada jalur yang disebut <span class="interactive-text" onclick="showModal('Orbit', 'Jalur tetap dan teratur yang dilalui oleh benda langit saat mengelilingi benda langit lainnya karena gaya gravitasi.')">orbit</span>, satelit alami, komet, asteroid, dan meteoroid.</p>
+                
+                <h3>Anggota Planet</h3>
+                <p>Klik pada kartu planet untuk mengetahui ciri-cirinya!</p>
+                <div class="planet-grid">
+                    <div class="planet-card" onclick="showModal('Merkurius', 'Planet terdekat dengan Matahari dan yang terkecil di Tata Surya.')">
+                        <div class="planet-icon">🪨</div><b>Merkurius</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Venus', 'Planet terpanas karena atmosfernya yang sangat tebal menjebak panas.')">
+                        <div class="planet-icon">✨</div><b>Venus</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Bumi', 'Satu-satunya planet yang diketahui memiliki kehidupan dan banyak air.')">
+                        <div class="planet-icon">🌍</div><b>Bumi</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Mars', 'Dijuluki planet merah karena permukaan tanahnya mengandung besi oksida.')">
+                        <div class="planet-icon">🔴</div><b>Mars</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Jupiter', 'Planet terbesar di Tata Surya, berupa raksasa gas.')">
+                        <div class="planet-icon">🟠</div><b>Jupiter</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Saturnus', 'Terkenal dengan sistem cincinnya yang besar dan indah.')">
+                        <div class="planet-icon">🪐</div><b>Saturnus</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Uranus', 'Planet es raksasa yang berputar miring pada porosnya.')">
+                        <div class="planet-icon">🧊</div><b>Uranus</b>
+                    </div>
+                    <div class="planet-card" onclick="showModal('Neptunus', 'Planet terjauh dari Matahari, memiliki angin yang sangat kencang.')">
+                        <div class="planet-icon">💨</div><b>Neptunus</b>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KONTEN: LATIHAN -->
+        <section id="latihan" class="section">
+            <div class="card">
+                <h2>Latihan Pemahaman</h2>
+                <p>Pilih mode latihan untuk menguji pengetahuanmu!</p>
+                
+                <div class="exercise-nav">
+                    <button class="ex-btn active" onclick="bukaLatihan(1)">Benar - Salah</button>
+                    <button class="ex-btn" onclick="bukaLatihan(2)">Mencocokkan</button>
+                    <button class="ex-btn" onclick="bukaLatihan(3)">Drag & Drop</button>
+                </div>
+
+                <!-- Latihan 1: Benar Salah -->
+                <div id="lat-1" class="exercise-container active">
+                    <h3>1. Benar atau Salah</h3>
+                    <div class="tf-question" id="tf-text">Matahari adalah sebuah planet yang sangat panas.</div>
+                    <div class="tf-controls">
+                        <button class="btn btn-accent" onclick="cekBenarSalah(true)">✅ BENAR</button>
+                        <button class="btn" style="background:var(--danger)" onclick="cekBenarSalah(false)">❌ SALAH</button>
+                    </div>
+                    <div id="tf-feedback" class="tf-feedback"></div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="btn" onclick="nextTF()">Soal Selanjutnya ➔</button>
+                    </div>
+                </div>
+
+                <!-- Latihan 2: Mencocokkan -->
+                <div id="lat-2" class="exercise-container">
+                    <h3>2. Pasangkan Planet & Cirinya</h3>
+                    <p>Klik nama planet di kiri, lalu klik ciri-cirinya di sebelah kanan!</p>
+                    <div class="match-game">
+                        <div class="match-col" id="match-left">
+                            <div class="match-item" data-id="1">Bumi</div>
+                            <div class="match-item" data-id="2">Mars</div>
+                            <div class="match-item" data-id="3">Saturnus</div>
+                        </div>
+                        <div class="match-col" id="match-right">
+                            <div class="match-item" data-match="3">Memiliki cincin yang jelas</div>
+                            <div class="match-item" data-match="1">Tempat tinggal makhluk hidup</div>
+                            <div class="match-item" data-match="2">Dijuluki planet merah</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latihan 3: Drag & Drop -->
+                <div id="lat-3" class="exercise-container">
+                    <h3>3. Kelompokkan Satelit Alam</h3>
+                    <p>Tarik (Drag) nama satelit di bawah ini ke kotak planet yang tepat!</p>
+                    
+                    <div class="dd-items" id="dd-tray">
+                        <div class="dd-item" draggable="true" id="drag-1" data-target="bumi">Bulan</div>
+                        <div class="dd-item" draggable="true" id="drag-2" data-target="mars">Phobos</div>
+                        <div class="dd-item" draggable="true" id="drag-3" data-target="mars">Deimos</div>
+                        <div class="dd-item" draggable="true" id="drag-4" data-target="jupiter">Ganymede</div>
+                    </div>
+
+                    <div class="dd-zones">
+                        <div class="dd-zone" data-planet="bumi">
+                            <h4>Bumi</h4>
+                        </div>
+                        <div class="dd-zone" data-planet="mars">
+                            <h4>Mars</h4>
+                        </div>
+                        <div class="dd-zone" data-planet="jupiter">
+                            <h4>Jupiter</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KONTEN: REFLEKSI -->
+        <section id="refleksi" class="section">
+            <div class="card">
+                <h2>Refleksi Pembelajaran</h2>
+                <p>Tuliskan apa saja yang sudah kamu pahami dari pembelajaran hari ini.</p>
+                
+                <label style="font-weight:bold; margin-bottom:10px; display:block;">Apa yang kamu pelajari dan apakah kamu sudah bisa membedakan setiap planet?</label>
+                <textarea id="refleksi-teks" placeholder="Contoh: Hari ini saya belajar bahwa planet terbesar adalah..."></textarea>
+                
+                <button class="btn btn-accent" onclick="simpanRefleksi()">💾 Simpan Refleksi</button>
+                <p id="refleksi-msg" style="color: var(--success); font-weight: bold; margin-top: 10px; display: none;">Tersimpan!</p>
+            </div>
+        </section>
+
+        <!-- KONTEN: PENGEMBANG -->
+        <section id="pengembang" class="section">
+            <div class="card dev-profile">
+                <h2>Profil Pengembang</h2>
+                <div class="dev-avatar">S</div>
+                <h3>Setyaningsih</h3>
+                <p>Pengembang Media Pembelajaran Interaktif</p>
+                <p><i>"Membawa alam semesta ke ruang kelas melalui teknologi."</i></p>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div id="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">✖</span>
+            <h3 id="modal-title">Judul</h3>
+            <p id="modal-desc">Deskripsi</p>
+        </div>
+    </div>
+
+    <!-- SCRIPT UTAMA -->
+    <script>
+        // === STATE & VARIABEL GLOBAL ===
+        let userData = { nama: '', kelas: '', sekolah: '' };
+        let isAudioOn = false;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // === FUNGSI AUDIO SINTESIS (Tanpa File Eksternal) ===
+        function playTone(frequency, type, duration, vol=0.1) {
+            if (!isAudioOn) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        const sfxClick = () => playTone(600, 'sine', 0.1, 0.1);
+        const sfxBenar = () => { playTone(523.25, 'sine', 0.1, 0.1); setTimeout(() => playTone(659.25, 'sine', 0.2, 0.1), 100); }
+        const sfxSalah = () => { playTone(300, 'sawtooth', 0.2, 0.1); setTimeout(() => playTone(250, 'sawtooth', 0.3, 0.1), 150); }
+        const sfxDrop = () => playTone(400, 'square', 0.1, 0.05);
+
+        // BGM Ambient Loop Sederhana
+        let bgmInterval;
+        let bgmNotes = [261.63, 329.63, 392.00, 523.25]; // C E G C
+        let bgmIndex = 0;
+        
+        function playBGM() {
+            if (!isAudioOn) return;
+            playTone(bgmNotes[bgmIndex], 'sine', 1, 0.02); // Suara sangat kecil & rileks
+            bgmIndex = (bgmIndex + 1) % bgmNotes.length;
+        }
+
+        function toggleAudio() {
+            isAudioOn = !isAudioOn;
+            const btn = document.getElementById('btn-audio');
+            if (isAudioOn) {
+                btn.innerText = '🔊';
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                bgmInterval = setInterval(playBGM, 800);
+            } else {
+                btn.innerText = '🔇';
+                clearInterval(bgmInterval);
+            }
+            sfxClick();
+        }
+
+        // === ALUR APLIKASI ===
+        function mulaiAplikasi() {
+            const nama = document.getElementById('in-nama').value.trim();
+            const kelas = document.getElementById('in-kelas').value.trim();
+            const sekolah = document.getElementById('in-sekolah').value.trim();
+
+            if(!nama || !kelas || !sekolah) {
+                alert("Harap isi semua data terlebih dahulu!");
+                return;
+            }
+
+            userData = { nama, kelas, sekolah };
+            
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            document.getElementById('welcome-text').innerText = `Halo, ${userData.nama}!`;
+
+            // Aktifkan Audio otomatis setelah interaksi user
+            isAudioOn = true;
+            document.getElementById('btn-audio').innerText = '🔊';
+            audioCtx.resume();
+            bgmInterval = setInterval(playBGM, 800);
+            
+            loadRefleksi();
+            setupMatchGame();
+            setupDragDrop();
+        }
+
+        // === NAVIGASI ===
+        function navigasi(id) {
+            sfxClick();
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if(window.innerWidth <= 768) {
+                document.getElementById('navLinks').classList.remove('show');
+            }
+        }
+
+        function toggleMenu() {
+            sfxClick();
+            document.getElementById('navLinks').classList.toggle('show');
+        }
+
+        function toggleFullScreen() {
+            sfxClick();
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // === MODAL MATERI ===
+        function showModal(title, desc) {
+            sfxClick();
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal').style.display = 'flex';
+        }
+        function closeModal() {
+            sfxClick();
+            document.getElementById('modal').style.display = 'none';
+        }
+        // Tutup modal jika klik di luar
+        window.onclick = function(event) {
+            let modal = document.getElementById('modal');
+            if (event.target == modal) closeModal();
+        }
+
+        // === LATIHAN MENU ===
+        function bukaLatihan(num) {
+            sfxClick();
+            document.querySelectorAll('.exercise-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.ex-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`lat-${num}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // === LATIHAN 1: BENAR SALAH ===
+        const tfData = [
+            { q: "Matahari adalah sebuah planet yang sangat panas.", a: false, ex: "Matahari adalah sebuah Bintang, bukan planet." },
+            { q: "Jupiter adalah planet terbesar di Tata Surya.", a: true, ex: "Tepat sekali! Jupiter adalah planet raksasa gas terbesar." },
+            { q: "Mars dijuluki planet biru karena banyak air.", a: false, ex: "Mars dijuluki planet merah. Planet biru adalah Bumi." }
+        ];
+        let tfIndex = 0;
+
+        function loadTF() {
+            document.getElementById('tf-text').innerText = tfData[tfIndex].q;
+            document.getElementById('tf-feedback').style.display = 'none';
+        }
+        
+        function cekBenarSalah(jawab) {
+            const current = tfData[tfIndex];
+            const fb = document.getElementById('tf-feedback');
+            fb.style.display = 'block';
+            
+            if(jawab === current.a) {
+                sfxBenar();
+                fb.className = 'tf-feedback correct';
+                fb.innerText = `BENAR! ${current.ex}`;
+            } else {
+                sfxSalah();
+                fb.className = 'tf-feedback wrong';
+                fb.innerText = `SALAH! ${current.ex}`;
+            }
+        }
+
+        function nextTF() {
+            sfxClick();
+            tfIndex = (tfIndex + 1) % tfData.length;
+            loadTF();
+        }
+        loadTF(); // Inisialisasi awal
+
+        // === LATIHAN 2: MENCOCOKKAN ===
+        let matchSelectedLeft = null;
+        
+        function setupMatchGame() {
+            const leftItems = document.querySelectorAll('#match-left .match-item');
+            const rightItems = document.querySelectorAll('#match-right .match-item');
+
+            leftItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if(item.classList.contains('matched')) return;
+                    sfxClick();
+                    leftItems.forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    matchSelectedLeft = item;
+                });
+            });
+
+            rightItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if(item.classList.contains('matched') || !matchSelectedLeft) return;
+                    
+                    if(item.getAttribute('data-match') === matchSelectedLeft.getAttribute('data-id')) {
+                        // Benar
+                        sfxBenar();
+                        item.classList.add('matched');
+                        matchSelectedLeft.classList.remove('selected');
+                        matchSelectedLeft.classList.add('matched');
+                        matchSelectedLeft = null;
+                    } else {
+                        // Salah
+                        sfxSalah();
+                        item.classList.add('wrong');
+                        setTimeout(() => item.classList.remove('wrong'), 500);
+                    }
+                });
+            });
+        }
+
+        // === LATIHAN 3: DRAG & DROP ===
+        function setupDragDrop() {
+            const items = document.querySelectorAll('.dd-item');
+            const zones = document.querySelectorAll('.dd-zone');
+
+            items.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    sfxClick();
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                    setTimeout(() => e.target.style.opacity = '0.5', 0);
+                });
+                item.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = '1';
+                });
+                
+                // Fallback klik untuk HP
+                item.addEventListener('click', (e) => {
+                    sfxClick();
+                    items.forEach(i => i.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)');
+                    e.target.style.boxShadow = '0 0 10px 5px var(--accent)';
+                    window.selectedDragItem = e.target; // Simpan global sementara
+                });
+            });
+
+            zones.forEach(zone => {
+                // Event Drag standar
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('hover');
+                });
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('hover');
+                });
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('hover');
+                    const id = e.dataTransfer.getData('text');
+                    const item = document.getElementById(id);
+                    handleDrop(item, zone);
+                });
+
+                // Fallback klik ke zona (Mobile Friendly)
+                zone.addEventListener('click', (e) => {
+                    if(window.selectedDragItem) {
+                        handleDrop(window.selectedDragItem, zone);
+                        window.selectedDragItem.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                        window.selectedDragItem = null;
+                    }
+                });
+            });
+        }
+
+        function handleDrop(item, zone) {
+            if(!item) return;
+            const targetPlanet = item.getAttribute('data-target');
+            const zonePlanet = zone.getAttribute('data-planet');
+
+            if(targetPlanet === zonePlanet) {
+                sfxBenar();
+                zone.appendChild(item);
+                item.style.margin = "5px 0";
+            } else {
+                sfxSalah();
+                // Kembali ke tray (gagal animasi sederhana)
+                item.style.transform = "translateX(10px)";
+                setTimeout(() => item.style.transform = "translateX(-10px)", 100);
+                setTimeout(() => item.style.transform = "translateX(0)", 200);
+            }
+        }
+
+        // === REFLEKSI (LOCAL STORAGE) ===
+        function simpanRefleksi() {
+            const teks = document.getElementById('refleksi-teks').value;
+            if(teks.trim() === '') {
+                sfxSalah();
+                alert("Tuliskan refleksi kamu terlebih dahulu ya!");
+                return;
+            }
+            
+            // Simpan ke local storage
+            localStorage.setItem('refleksi_tata_surya', teks);
+            sfxBenar();
+            
+            const msg = document.getElementById('refleksi-msg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }
+
+        function loadRefleksi() {
+            const simpanan = localStorage.getItem('refleksi_tata_surya');
+            if(simpanan) {
+                document.getElementById('refleksi-teks').value = simpanan;
+            }
+        }
+
+    </script>
+</body>
+</html>
